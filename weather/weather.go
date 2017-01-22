@@ -1,11 +1,11 @@
 package weather
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"log"
-	"encoding/json"
+	"net/http"
 )
 
 const apiKey = "aa34c9b93c8e923537921e29afefbd23"
@@ -34,14 +34,9 @@ type urlType struct {
 	apiKey string
 }
 
-func buildUrl(u urlType) string {
+func GetForecast() []byte {
 	var city string = "cologne"
-	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q={%s}&appid=%s", city, apiKey)
-	return url
-}
-
-func getForecast() []byte {
-	forecastUrl := buildUrl(urlType{city: "cologne", apiKey: apiKey})
+	forecastUrl := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q={%s}&appid=%s", city, apiKey)
 	res, err := http.Get(forecastUrl)
 	defer res.Body.Close()
 	if err != nil {
@@ -49,16 +44,16 @@ func getForecast() []byte {
 	}
 
 	weather, err := ioutil.ReadAll(res.Body)
+	fmt.Println(weather)
 	return weather
 }
 
 func CreateForecast() (WeatherReport, error) {
 	var report WeatherReport
-	data := getForecast()
+	data := GetForecast()
 
 	if err := json.Unmarshal(data, &report); err != nil {
 		return report, err
 	}
 	return report, nil
 }
-
